@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>sam solomon</title>
+  <meta name="description" content="sam solomon — links and projects">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='1' y='13' font-family='monospace' font-size='14' fill='%23111'%3E%26gt;%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --fg: #111;
+      --muted: #666;
+      --hover: #555;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0a0a;
+        --fg: #eeeeee;
+        --muted: #888;
+        --hover: #bbb;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    main {
+      max-width: 32rem;
+      padding: 4rem 2rem;
+    }
+
+    h1 {
+      font-size: 1rem;
+      font-weight: 400;
+      margin: 0 0 0.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--fg);
+      display: inline-block;
+    }
+
+    .blurb {
+      margin: 0 0 2rem;
+      max-width: 28rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 2rem 0 0.5rem;
+    }
+
+    h2 .marker {
+      color: var(--muted);
+      margin-right: 0.5rem;
+      font-weight: 400;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0 0 0 1rem;
+    }
+
+    li { margin: 0.15rem 0; }
+
+    a {
+      color: var(--fg);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-thickness: 1px;
+    }
+    a:hover { color: var(--hover); }
+    a:focus-visible {
+      outline: 1px solid var(--fg);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 480px) {
+      main { padding: 2rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>sam solomon</h1>
+    <p class="blurb">engineer working at the intersection of biology and software. occasional side projects.</p>
+
+    <h2><span class="marker">&gt;</span>projects</h2>
+    <ul>
+      <li><a href="#">project-one</a></li>
+      <li><a href="#">project-two</a></li>
+      <li><a href="#">project-three</a></li>
+    </ul>
+
+    <h2><span class="marker">&gt;</span>elsewhere</h2>
+    <ul>
+      <li><a href="https://github.com/" rel="me">github</a></li>
+      <li><a href="https://x.com/" rel="me">twitter</a></li>
+      <li><a href="https://linkedin.com/" rel="me">linkedin</a></li>
+    </ul>
+  </main>
+</body>
+</html>
