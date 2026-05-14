@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://samsolomon.com/sitemap.xml
