@@ -1,0 +1,83 @@
+<div class="hero-flow" aria-hidden="true"><canvas></canvas></div>
+<script>
+import * as THREE from 'three';
+const host = document.querySelector<HTMLElement>('.hero-flow');
+const canvas = host?.querySelector('canvas');
+if (host && canvas) {
+  let renderer: THREE.WebGLRenderer | undefined;
+  try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'low-power' }); } catch { /* Text remains intact without WebGL. */ }
+  if (renderer) {
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    renderer.setClearColor(0xffffff, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-10,10,5,-5,.1,100);
+    camera.position.set(0,0,20);
+    scene.add(new THREE.HemisphereLight(0xffffff,0x9d8e80,3));
+    const key = new THREE.DirectionalLight(0xffffff,4); key.position.set(-3,6,10); scene.add(key);
+    const fill = new THREE.DirectionalLight(0xd2e2ff,2); fill.position.set(5,-2,5); scene.add(fill);
+    // A continuous tapered coil, not an emoji or flat illustration.
+    const vertices:number[]=[], indices:number[]=[];
+    const segments=180, sides=16;
+    const center=(t:number)=>{
+      // Bury the start inside the base, then stack broad, touching turns.
+      const u=Math.max(0,(t-.08)/.92);
+      const a=u*Math.PI*5.1+Math.PI;
+      const r=.57*Math.pow(1-u,.85)*Math.min(1,t/.08);
+      const tip=Math.pow(Math.max(0,(u-.88)/.12),2);
+      return new THREE.Vector3(Math.cos(a)*r+tip*.065, -.40+u*.94+tip*.07,Math.sin(a)*r);
+    };
+    for(let i=0;i<=segments;i++) {
+      const t=i/segments, p=center(t);
+      const tangent=center(Math.min(1,t+.001)).sub(center(Math.max(0,t-.001))).normalize();
+      const normal=new THREE.Vector3(0,1,0).cross(tangent).normalize();
+      const binormal=tangent.clone().cross(normal).normalize();
+      const u=Math.max(0,(t-.08)/.92);
+      const start=Math.min(1,t/.025);
+      const taper=Math.pow(Math.max(0,1-u),.48);
+      const radius=(.32*taper+.003)*start;
+      for(let j=0;j<=sides;j++) {const a=j/sides*Math.PI*2;const v=p.clone().addScaledVector(normal,Math.cos(a)*radius).addScaledVector(binormal,Math.sin(a)*radius);vertices.push(v.x,v.y,v.z);if(i<segments&&j<sides){const n=i*(sides+1)+j;indices.push(n,n+1,n+sides+1,n+1,n+sides+2,n+sides+1);}}
+    }
+    const coil=new THREE.BufferGeometry();coil.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));coil.setIndex(indices);coil.computeVertexNormals();
+    // Flat-shaded brilliant silhouette: table, wide girdle and pointed pavilion.
+    const diamondVertices:number[]=[];
+    const rings=[{y:.65,r:.34},{y:.22,r:.72},{y:.12,r:.72},{y:-.78,r:0}];
+    for(let r=0;r<rings.length-1;r++) for(let j=0;j<8;j++) {
+      const a=j/8*Math.PI*2,b=(j+1)/8*Math.PI*2;
+      const point=(k:number,angle:number)=>[Math.cos(angle)*rings[k].r,rings[k].y,Math.sin(angle)*rings[k].r];
+      diamondVertices.push(...point(r,a),...point(r+1,a),...point(r,b),...point(r,b),...point(r+1,a),...point(r+1,b));
+    }
+    for(let j=0;j<8;j++) diamondVertices.push(0,.65,0,Math.cos((j+1)/8*Math.PI*2)*.34,.65,Math.sin((j+1)/8*Math.PI*2)*.34,Math.cos(j/8*Math.PI*2)*.34,.65,Math.sin(j/8*Math.PI*2)*.34);
+    const gem=new THREE.BufferGeometry();gem.setAttribute('position',new THREE.Float32BufferAttribute(diamondVertices,3));gem.computeVertexNormals();
+    const items=Array.from({length:18},(_,i)=>{
+      const dirt=new THREE.MeshStandardMaterial({color:0xb6a18f,roughness:.65,metalness:.04,transparent:false,opacity:1,depthWrite:true});
+      const crystal=new THREE.MeshStandardMaterial({color:0xc4d9e3,roughness:.12,metalness:.4,transparent:false,opacity:1,depthWrite:true,flatShading:true,side:THREE.DoubleSide});
+      const incoming=new THREE.Mesh(coil,dirt),outgoing=new THREE.Mesh(gem,crystal);
+      scene.add(incoming,outgoing);
+      return {incoming,outgoing,phase:i/18,lane:Math.sin(i*2.399)*3.9,size:.29+(i%4)*.06};
+    });
+    let width=10, elapsed=0, previous=0, frame=0, inView=true;
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+    function draw(){
+      items.forEach((item,i)=>{
+        const t=(elapsed/23+item.phase)%1;
+        const x=(t*2-1)*(width+1.2);
+        const spread=Math.pow(Math.abs(t-.5)*2,.9);
+        const y=-.65+item.lane*spread;
+        for(const mesh of [item.incoming,item.outgoing]) {mesh.position.set(x,y,Math.sin(i)*1.4);mesh.rotation.set(.2+Math.sin(elapsed*.18+i)*.18,elapsed*.22+i,.12*Math.sin(i+elapsed*.2));mesh.scale.setScalar(item.size*(.65+.35*spread));}
+        item.incoming.visible=t<.5; item.outgoing.visible=t>=.5;
+      });
+      renderer!.render(scene,camera);
+    }
+    function tick(now:number){if(previous)elapsed+=Math.min((now-previous)/1000,.05);previous=now;draw();frame=requestAnimationFrame(tick);}
+    function sync(){cancelAnimationFrame(frame);previous=0;if(inView&&!document.hidden&&!reduced.matches)frame=requestAnimationFrame(tick);else draw();}
+    const resize=new ResizeObserver(()=>{const rect=host!.getBoundingClientRect();width=5*rect.width/rect.height;camera.left=-width;camera.right=width;camera.updateProjectionMatrix();renderer!.setSize(rect.width,rect.height,false);draw();});resize.observe(host);
+    const observer=new IntersectionObserver(([entry])=>{inView=entry.isIntersecting;sync();});observer.observe(host);
+    document.addEventListener('visibilitychange',sync);reduced.addEventListener('change',sync);
+    sync();
+    window.addEventListener('pagehide',()=>{cancelAnimationFrame(frame);resize.disconnect();observer.disconnect();document.removeEventListener('visibilitychange',sync);reduced.removeEventListener('change',sync);coil.dispose();gem.dispose();items.forEach(i=>{i.incoming.material.dispose();i.outgoing.material.dispose();});renderer!.dispose();},{once:true});
+  }
+}
+</script>
+<style>
+.hero-flow{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;opacity:.24;mask-image:linear-gradient(to right,transparent,#000 8%,#000 30%,#0003 48%,#0003 52%,#000 70%,#000 92%,transparent)}canvas{display:block;width:100%;height:100%}@media(max-width:750px){.hero-flow{opacity:.16}}
+</style>

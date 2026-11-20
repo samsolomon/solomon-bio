@@ -1,0 +1,18 @@
+{
+  "colors": {
+    "background": "#ffffff",
+    "ink": "#292929",
+    "muted": "#737373",
+    "dividers": "#f4f4f4"
+  },
+  "typography": {
+    "display": "Geist Serif",
+    "body": "Inter Variable"
+  },
+  "reference": "https://www.v7labs.com/",
+  "layout": {
+    "maxWidth": 1440,
+    "gutter": 52,
+    "mobileGutter": 24
+  }
+}
